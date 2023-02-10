@@ -64,6 +64,10 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         sensor_msgs::ChannelFloat32 id_of_line;   //  feature id
         sensor_msgs::ChannelFloat32 u_of_endpoint;    //  u
         sensor_msgs::ChannelFloat32 v_of_endpoint;    //  v
+        sensor_msgs::ChannelFloat32 cur_u_of_startpoint;    //  u
+        sensor_msgs::ChannelFloat32 cur_v_of_startpoint;    //  v
+        sensor_msgs::ChannelFloat32 cur_u_of_endpoint;    //  u
+        sensor_msgs::ChannelFloat32 cur_v_of_endpoint;    //  v
 
         feature_lines->header = img_msg->header;
         feature_lines->header.frame_id = "world";
@@ -74,8 +78,9 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
             if (i != 1 || !STEREO_TRACK)  // 单目
             {
                 auto un_lines = trackerData.undistortedLineEndPoints();
+                // curframe_->vecLine[i].StartPt.x;
 
-                //auto &cur_lines = trackerData.curframe_->vecLine;
+                auto &cur_lines = trackerData.curframe_->vecLine;
                 auto &ids = trackerData.curframe_->lineID;
 
                 for (unsigned int j = 0; j < ids.size(); j++)
@@ -84,15 +89,19 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
                     int p_id = ids[j];
                     hash_ids[i].insert(p_id);
                     geometry_msgs::Point32 p;
-                    p.x = un_lines[j].StartPt.x;
-                    p.y = un_lines[j].StartPt.y;
+                    p.x = un_lines[j].StartPt.x; // un_lines[j].StartPt.x;
+                    p.y = un_lines[j].StartPt.y; // un_lines[j].StartPt.y;
                     p.z = 1;
-
                     feature_lines->points.push_back(p);
                     id_of_line.values.push_back(p_id * NUM_OF_CAM + i);
                     //std::cout<< "feature tracking id: " <<p_id * NUM_OF_CAM + i<<" "<<p_id<<"\n";
-                    u_of_endpoint.values.push_back(un_lines[j].EndPt.x);
+                    u_of_endpoint.values.push_back(un_lines[j].EndPt.x);// un_lines[j].EndPt.x);
                     v_of_endpoint.values.push_back(un_lines[j].EndPt.y);
+                    cur_u_of_startpoint.values.push_back(cur_lines[j].StartPt.x);// un_lines[j].EndPt.x);
+                    cur_v_of_startpoint.values.push_back(cur_lines[j].StartPt.y);
+                    cur_u_of_endpoint.values.push_back(cur_lines[j].EndPt.x);// un_lines[j].EndPt.x);
+                    cur_v_of_endpoint.values.push_back(cur_lines[j].EndPt.y);
+                    // ROS_INFO("line %d, at (%f, %f)", j, un_lines[j].StartPt.x,  un_lines[j].StartPt.y);
                     //ROS_ASSERT(inBorder(cur_pts[j]));
                 }
             }
@@ -101,9 +110,12 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         feature_lines->channels.push_back(id_of_line);
         feature_lines->channels.push_back(u_of_endpoint);
         feature_lines->channels.push_back(v_of_endpoint);
-        ROS_DEBUG("publish %f, at %f", feature_lines->header.stamp.toSec(), ros::Time::now().toSec());
+        feature_lines->channels.push_back(cur_u_of_startpoint);
+        feature_lines->channels.push_back(cur_v_of_startpoint);
+        feature_lines->channels.push_back(cur_u_of_endpoint);
+        feature_lines->channels.push_back(cur_v_of_endpoint);
+        ROS_INFO("lines publish %d, at %f", feature_lines->points.size(), ros::Time::now().toSec());
         pub_img.publish(feature_lines);
-
     }
     sum_time += t_r.toc();
     mean_time = sum_time/frame_cnt;

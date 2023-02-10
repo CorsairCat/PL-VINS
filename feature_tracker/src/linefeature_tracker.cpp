@@ -415,7 +415,7 @@ void LineFeatureTracker::readImage(const cv::Mat &_img)
     frame_cnt++;
 
     cv::remap(_img, img, undist_map1_, undist_map2_, CV_INTER_LINEAR);
-
+    // img = _img;
 
 
 //    cv::imshow("lineimg",img);

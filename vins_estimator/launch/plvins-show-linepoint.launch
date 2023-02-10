@@ -28,6 +28,7 @@
     </node>
 
     <node name="image_node_b" pkg="image_node_b" type="image_node_b" output="log">
+        <param name="config_file" type="string" value="$(arg config_path)" />
     </node>   
 </launch>
 

@@ -20,7 +20,9 @@ find_package(catkin REQUIRED COMPONENTS
  camera_model
 )
 
-find_package(OpenCV REQUIRED)
+# find_package(OpenCV REQUIRED)
+Set(OpenCV_DIR "/home/asdw/opencv/build") # important find opencv version
+find_package(OpenCV 3.2 QUIET)
 
 catkin_package(CATKIN_DEPENDS
 roscpp

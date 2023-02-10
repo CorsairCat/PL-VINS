@@ -1,13 +1,24 @@
 <launch>
 
-    <arg name="config_path" default = "$(find feature_tracker)/../config/euroc/euroc_config_fix_extrinsic.yaml" />
-	  <arg name="vins_path" default = "$(find feature_tracker)/../config/../" />
+    <arg name="config_path" default = "$(find feature_tracker)/../config/euroc/euroc_config_asdwtest.yaml" />
+	<arg name="vins_path" default = "$(find feature_tracker)/../config/../" />
 
-    <node pkg="rosbag" type="play" name="playe"  args="/home/dragon/ros_ws/small.bag"/> 
+    <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find plvins_estimator)/../config/vins_rviz_config_asdw.rviz" />
+
+    <node pkg="rosbag" type="play" name="playe"  args="/home/asdw/Desktop/tracking_KF/coridor_atriumC_window_moving.bag"/> 
+
+    <node name="feature_tracker" pkg="feature_tracker" type="feature_tracker" output="screen">
+        <param name="config_file" type="string" value="$(arg config_path)" />
+        <param name="vins_folder" type="string" value="$(arg vins_path)" />
+    </node>
+
     <node name="linefeature_tracker" pkg="feature_tracker" type="LineFeature_tracker" output="screen">
         <param name="config_file" type="string" value="$(arg config_path)" />
         <param name="vins_folder" type="string" value="$(arg vins_path)" />
-    </node>    
+    </node>
 
+    <node name="image_node_b" pkg="image_node_b" type="image_node_b" output="screen">
+        <param name="config_file" type="string" value="$(arg config_path)" />
+    </node> 
 </launch>
 

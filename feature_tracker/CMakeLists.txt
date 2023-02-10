@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     camera_model
     message_filters
     )
-Set(OpenCV_DIR "/home/healer/Downloads/opencv3.2/opencv-3.2.0/build") # important find opencv version
+Set(OpenCV_DIR "/home/asdw/opencv/build") # important find opencv version
 find_package(OpenCV 3.2 QUIET)
 
 catkin_package()
@@ -27,7 +27,7 @@ find_package(Eigen3  REQUIRED)
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
-  /home/healer/catkin_PLVINS/src/PL-VINS/feature_tracker/src/line_descriptor/include # find LSD 
+  /home/asdw/catkin_plvins/src/PL-VINS/feature_tracker/src/line_descriptor/include # find LSD 
 ) 
 
 add_executable(feature_tracker
@@ -58,5 +58,5 @@ add_executable(LineFeature_tracker
 target_link_libraries(LineFeature_tracker 
 ${catkin_LIBRARIES} 
 ${OpenCV_LIBS}
-/home/healer/catkin_PLVINS/src/PL-VINS/feature_tracker/src/line_descriptor/lib/liblinedesc.so  # line feature
+/home/asdw/catkin_plvins/src/PL-VINS/feature_tracker/src/line_descriptor/lib/liblinedesc.so  # line feature
 )

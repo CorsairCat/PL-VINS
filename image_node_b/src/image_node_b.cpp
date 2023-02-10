@@ -31,6 +31,7 @@
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/image_encodings.h>
 
+#include "parameters.h"
 #include "camodocal/camera_models/CameraFactory.h"
 #include "camodocal/camera_models/CataCamera.h"
 #include "camodocal/camera_models/PinholeCamera.h"
@@ -55,15 +56,20 @@ void callback(const sensor_msgs::PointCloudConstPtr &point_feature_msg,
     for(int i=0; i<point_feature_msg->points.size(); i++)
     {
         cv::Point endPoint = cv::Point(point_feature_msg->channels[1].values[i], point_feature_msg->channels[2].values[i]);
+        // cv::Point2f endPoint = cv::Point2f(line_feature_msg->channels[1].values[i], line_feature_msg->channels[2].values[i]);  
         cv::circle(img1, endPoint, 2, cv::Scalar(0, 255, 0), 2);
     }
 
     cv::remap(img1, show_img, undist_map1_, undist_map2_, CV_INTER_LINEAR);
+
     for(int i=0; i<line_feature_msg->points.size(); i++)
     {
-        cv::Point startPoint = cv::Point(line_feature_msg->channels[3].values[i], line_feature_msg->channels[4].values[i]);
-        cv::Point endPoint = cv::Point(line_feature_msg->channels[5].values[i], line_feature_msg->channels[6].values[i]);
-        cv::line(show_img, startPoint, endPoint, cv::Scalar(0, 0, 255),2 ,8);
+        cv::Point lineStartPoint = cv::Point(line_feature_msg->channels[3].values[i], line_feature_msg->channels[4].values[i]);
+        cv::Point lineEndPoint = cv::Point(line_feature_msg->channels[5].values[i], line_feature_msg->channels[6].values[i]);
+        // cv::Point lineStartPoint = cv::Point(line_feature_msg->points[i].x, line_feature_msg->points[i].y);                                                                                                                                                                                                                    
+        // cv::Point lineEndPoint = cv::Point(line_feature_msg->channels[1].values[i], line_feature_msg->channels[2].values[i]);                                                                          
+        cv::line(show_img, lineStartPoint, lineEndPoint, cv::Scalar(255, 0, 0), 2, 8);
+        // cv::circle(img1, lineStartPoint, 2, cv::Scalar(255, 0, 0), 2);
     }
 
     sensor_msgs::ImagePtr output_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", show_img).toImageMsg();
@@ -75,15 +81,16 @@ void callback(const sensor_msgs::PointCloudConstPtr &point_feature_msg,
 
 int main(int argc, char **argv) {
 
-  m_camera = camodocal::CameraFactory::instance()->generateCameraFromYamlFile("/../../config/euroc/euroc_config_fix_extrinsic.yaml");
-  K_ = m_camera->initUndistortRectifyMap(undist_map1_,undist_map2_);  
-
   ros::init(argc, argv, "sync_control_node"); 
-  ros::NodeHandle nh;                      
+  ros::NodeHandle nh("~");
+  readParameters(nh);
 
-  message_filters::Subscriber<sensor_msgs::PointCloud> point_feature_sub(nh, "/feature_tracker/feature",1000); 
+  m_camera = camodocal::CameraFactory::instance()->generateCameraFromYamlFile(G_CONFIG_FILE);
+  K_ = m_camera->initUndistortRectifyMap(undist_map1_,undist_map2_);                 
+
+  message_filters::Subscriber<sensor_msgs::PointCloud> point_feature_sub(nh, "/feature_tracker/feature", 1000); 
   message_filters::Subscriber<sensor_msgs::PointCloud> line_feature_sub(nh, "/linefeature_tracker/linefeature", 1000);
-  message_filters::Subscriber<sensor_msgs::Image> image_sub(nh, "/cam0/image_raw", 1000);
+  message_filters::Subscriber<sensor_msgs::Image> image_sub(nh, IMAGE_TOPIC, 1000);
   pub_point_line = nh.advertise<sensor_msgs::Image>("/PointLine_image",1000);
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud,sensor_msgs::PointCloud,sensor_msgs::Image> MySyncPolicy;
   

@@ -159,7 +159,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
                     p.x = un_pts[j].x;
                     p.y = un_pts[j].y;
                     p.z = 1;
-
+                    // ROS_INFO("point %d, at (%f, %f), cur (%f, %f)", j, un_pts[j].x,  un_pts[j].y, cur_pts[j].x, cur_pts[j].y);
                     feature_points->points.push_back(p);
                     id_of_point.values.push_back(p_id * NUM_OF_CAM + i);
                     u_of_point.values.push_back(cur_pts[j].x);
@@ -251,6 +251,7 @@ int main(int argc, char **argv)
     ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
     readParameters(n);
 
+    ROS_INFO("Initial of line feature %.0f", NUM_OF_CAM);
     for (int i = 0; i < NUM_OF_CAM; i++)
         trackerData[i].readIntrinsicParameter(CAM_NAMES[i]);
 
